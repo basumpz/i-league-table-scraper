@@ -4,7 +4,7 @@ from BeautifulSoup import BeautifulSoup as bs
 def scrape():
 
     # URL for i-league
-    URL="http://i-league.org/?page_id=1044"
+    URL="http://www.goal.com/en-india/tables/i-league/150?ICID=TA"
 
     # Get the page
     page = requests.get(URL)
@@ -14,12 +14,8 @@ def scrape():
 
     # Fetch the FIRST table and inside that, the FIRST(duh) tbody
     tbody = soup.find("table").find("tbody")
-    
-    # Fetch all the td's with the class "club"
-    # This contains all the club details
-    # All the parent td's have alternating classes - "Even" and "Odd" so what i did
-    # was to take the club classes and then work my way upward from there
-    clubs = tbody.findAll("td",{"class":"club"})
+
+    clubs = tbody.findAll("tr")
 
     # Table
     table = ""
@@ -31,20 +27,18 @@ def scrape():
     # Go through the list of clubs
     for club in clubs:
 
-      # Pick up the club name as the title of the image (logo)
-      # Doing this because the content of the td's aren't consistent
-      club_name = club.find("img")["title"]
+        club_name = club.find("td", {"class":"flag"}).find("a")["title"]
 
-      # Get the parent of the club (this gives us the whole td)
-      parent = club.parent
 
-      # From the parent get the required info
-      p = parent.find("td",{"class":"p"}).getText()
-      gd = parent.find("td",{"class":"gd"}).getText()
-      pts = parent.find("td",{"class":"pts"}).getText()
+        pts = club.findAll("td")[4].text
+        p = club.findAll("td")[5].text
+        w = club.findAll("td")[6].text
+        d = club.findAll("td")[7].text
+        l = club.findAll("td")[8].text
+        gd = club.find("td", {"class":"always-ltr"}).text
 
-      # Print the info in markdown format
-      table += club_name + "|" + p + "|" + gd + "|" + pts + "\n"
+        # Print the info in markdown format
+        table += "%s|%s|%s|%s\n" % (club_name, p, gd, pts)
 
     #END for
 
